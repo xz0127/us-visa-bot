@@ -70,7 +70,7 @@ def has_website_changed(driver, url, no_appointment_text):
 
 
 def run_visa_scraper(url, no_appointment_text):
-    seconds_between_checks = 10 * 60
+    seconds_between_checks = 1 * 60
 
     # Setting Chrome options to run the scraper headless.
     chrome_options = Options()
@@ -90,15 +90,14 @@ def run_visa_scraper(url, no_appointment_text):
             print('A change was found. Notifying it.')
             send_message('A change was found. Here is an screenshot.')
             send_photo(driver.get_screenshot_as_png())
-
             # Closing the driver before quicking the script.
-            input('Press enter to quit...')
-            driver.close()
-            exit()
+            # input('Press enter to quit...')
+            # driver.close()
+            # exit()
         else:
-            send_message('No slots available')
+            # send_message('No slots available')
             print(f'No change was found. Checking again in {seconds_between_checks} seconds.')
-            time.sleep(seconds_between_checks)
+            # time.sleep(seconds_between_checks)
             # for seconds_remaining in range(int(seconds_between_checks), 0, -1):
             #     sys.stdout.write('\r')
             #     sys.stdout.write(
@@ -106,7 +105,8 @@ def run_visa_scraper(url, no_appointment_text):
             #     )
             #     sys.stdout.flush()
             #     time.sleep(1)
-            print('\n')
+        print('\n')
+        time.sleep(seconds_between_checks)
 
 
 def main():
