@@ -31,8 +31,3 @@ if __name__ == "__main__":
     print('Results:')
     pp.pprint(response_json)
     assert response_json['ok']
-
-    with open('archive/test.png', 'rb') as f:
-        response = json.loads(send_photo(f).text)
-    pp.pprint(response)
-    assert response['ok']

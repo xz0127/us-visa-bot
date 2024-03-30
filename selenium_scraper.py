@@ -15,6 +15,7 @@ load_dotenv()
 URL_ID = os.getenv('URL_ID')
 COUNTRY_CODE = os.getenv('COUNTRY_CODE')
 BASE_URL = f'https://ais.usvisa-info.com/en-{COUNTRY_CODE}/niv'
+USER = os.getenv('USERNAME')
 
 
 def log_in(driver):
@@ -32,7 +33,8 @@ def log_in(driver):
         pass
     # Filling the user and password
     user_box = driver.find_element(By.NAME, 'user[email]')
-    user_box.send_keys(os.getenv('USERNAME'))
+    # user_box.send_keys(os.getenv('USERNAME'))
+    user_box.send_keys('clorisshi@hotmail.com')
     password_box = driver.find_element(By.NAME, 'user[password]')
     password_box.send_keys(os.getenv('PASSWORD'))
     # Clicking the checkbox
@@ -41,13 +43,12 @@ def log_in(driver):
     driver.find_element(By.XPATH, '//*[@id="sign_in_form"]/p/input').click()
 
     # Waiting for the page to load.
-    # 5 seconds may be ok for a computer, but it doesn't seem enougn for the Raspberry Pi 4.
-    time.sleep(10)
+    time.sleep(5)
     print('Logged in.')
 
 
 def has_website_changed(driver, url, no_appointment_text):
-    '''Checks for changes in the site. Returns True if a change was found.'''
+    # Checks for changes in the site. Returns True if a change was found.
     # Log in
     while True:
         try:
@@ -56,10 +57,6 @@ def has_website_changed(driver, url, no_appointment_text):
             break
         except ElementNotInteractableException:
             time.sleep(5)
-
-    # # For debugging false positives.
-    # with open('debugging/page_source.html', 'w', encoding='utf-8') as f:
-    #     f.write(driver.page_source)
 
     # Getting main text
     main_page = driver.find_element(By.ID, 'main')
@@ -73,19 +70,14 @@ def has_website_changed(driver, url, no_appointment_text):
 
 
 def run_visa_scraper(url, no_appointment_text):
-    # To run Chrome in a virtual display with xvfb (just in Linux)
-    # display = Display(visible=0, size=(800, 600))
-    # display.start()
-
     seconds_between_checks = 10 * 60
 
     # Setting Chrome options to run the scraper headless.
     chrome_options = Options()
     # chrome_options.add_argument("--disable-extensions")
     # chrome_options.add_argument("--disable-gpu")
-    # chrome_options.add_argument("--no-sandbox") # linux only
     if os.getenv('HEADLESS') == 'True':
-        chrome_options.add_argument("--headless")  # Comment for visualy debugging
+        chrome_options.add_argument("--headless")  # Comment for visually debugging
 
     # Initialize the chromediver (must be installed and in PATH)
     # Needed to implement the headless option
@@ -104,15 +96,16 @@ def run_visa_scraper(url, no_appointment_text):
             driver.close()
             exit()
         else:
-            # print(f'No change was found. Checking again in {seconds_between_checks} seconds.')
-            # time.sleep(seconds_between_checks)
-            for seconds_remaining in range(int(seconds_between_checks), 0, -1):
-                sys.stdout.write('\r')
-                sys.stdout.write(
-                    f'No change was found. Checking again in {seconds_remaining} seconds.'
-                )
-                sys.stdout.flush()
-                time.sleep(1)
+            send_message('No slots available')
+            print(f'No change was found. Checking again in {seconds_between_checks} seconds.')
+            time.sleep(seconds_between_checks)
+            # for seconds_remaining in range(int(seconds_between_checks), 0, -1):
+            #     sys.stdout.write('\r')
+            #     sys.stdout.write(
+            #         f'No change was found. Checking again in {seconds_remaining} seconds.'
+            #     )
+            #     sys.stdout.flush()
+            #     time.sleep(1)
             print('\n')
 
 
@@ -121,12 +114,7 @@ def main():
 
     # Checking for an appointment
     url = base_url + '/payment'
-    text = 'There are no available appointments at this time.'
-
-    # Checking for a rescheduled
-    # url = base_url + '/appointment'
-    # text = 'FORCING SCREENSHOT'
-    # text = 'There are no available appointments at the selected location.'
+    text = 'London No Appointments Available'
 
     run_visa_scraper(url, text)
 
